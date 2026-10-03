@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {%- block metadata %}{% endblock metadata %}
+    <title>{% block title %}{{ config['APP_NAME'] | title }}{% endblock title %}</title>
+    {%- block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='tailwind.min.css', v=time.time()) }}">
+    {%- endblock styles %}
+</head>
+<body>
+    {%- block content %}{% endblock content %}
+    {%- block scripts %}{% endblock scripts %}
+</body>
+</html>
