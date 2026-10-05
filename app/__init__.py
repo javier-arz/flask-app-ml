@@ -1,7 +1,7 @@
 import time
 
 from config import config
-from flask import Flask
+from flask import Flask, jsonify
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -39,5 +39,15 @@ def create_app(config_name) -> Flask:
 
     from app.routes.images import bp as images_blueprint
     app.register_blueprint(images_blueprint, url_prefix='/images')
+
+    from app.routes.api import bp as api_blueprint
+    app.register_blueprint(api_blueprint, url_prefix='/api')
+
+    @app.errorhandler(413)
+    def request_entity_too_large(error):
+        """Return a JSON error for oversized uploads instead of HTML."""
+        return jsonify({
+            'error': 'La imagen excede el tamaño máximo permitido (5 MB).'
+        }), 413
 
     return app

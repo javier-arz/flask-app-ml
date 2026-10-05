@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: Image Prediction API
+  version: 1.0.0
+  description: >
+    Single prediction endpoint. Analyzes an uploaded image with the project's
+    pre-trained CIFAR-10 classifier and returns the predicted category, a
+    confidence percentage, and an uncertainty flag. When confidence is strictly
+    below the configured threshold (50%), the user-facing message includes an
+    explicit uncertainty statement.
+servers:
+  - url: /
+    description: Local Flask development server
+paths:
+  /images/predict:
+    post:
+      summary: Analyze an uploaded image
+      operationId: predictImage
+      tags:
+        - images
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Image file to analyze. Supported formats JPG, PNG, WEBP. Max size 5 MB.
+      responses:
+        "200":
+          description: Image analyzed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PredictionResult"
+              examples:
+                confident:
+                  value:
+                    message: "Detecté: gato (87.0% de certeza)."
+                    prediction: gato
+                    confidence: 87.0
+                    uncertain: false
+                    model: cifar10
+                uncertain:
+                  value:
+                    message: "Detecté: gato (32.4% de certeza). No estoy completamente seguro de esta predicción."
+                    prediction: gato
+                    confidence: 32.4
+                    uncertain: true
+                    model: cifar10
+        "400":
+          description: No file provided, or the content is not a decodable image / unsupported format.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                noFile:
+                  value:
+                    error: "No se recibió ninguna imagen."
+                invalidImage:
+                  value:
+                    error: "El archivo no es una imagen válida o el formato no está soportado."
+        "413":
+          description: Uploaded payload exceeds the maximum allowed size (5 MB).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "La imagen excede el tamaño máximo permitido (5 MB)."
+        "500":
+          description: The model could not be loaded or inference failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "No fue posible analizar la imagen en este momento."
+components:
+  schemas:
+    PredictionResult:
+      type: object
+      required:
+        - message
+        - prediction
+        - confidence
+        - uncertain
+        - model
+      properties:
+        message:
+          type: string
+          description: User-facing message; includes the uncertainty statement when uncertain is true.
+        prediction:
+          type: string
+          description: Display label of the predicted category.
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: Confidence percentage for the top prediction, one decimal place.
+        uncertain:
+          type: boolean
+          description: True when confidence is strictly below the configured threshold (50%).
+        model:
+          type: string
+          description: Name of the model that produced the prediction.
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: User-facing error message; never exposes internal details.

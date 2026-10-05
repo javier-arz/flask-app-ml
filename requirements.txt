@@ -13,3 +13,12 @@ python-dotenv==1.2.4
 SQLAlchemy==2.1.2
 typing_extensions==4.16.0
 Werkzeug==3.1.9
+
+# Machine Learning (image inference)
+keras==3.13.2
+numpy==2.5.3
+opencv-python-headless==5.0.0.93
+torch==2.14.1
+
+# Testing
+pytest==9.1.1

@@ -1,0 +1,33 @@
+{
+  "models": [
+    {
+      "name": "cifar10",
+      "type": "classification",
+      "input_modality": "image",
+      "input_shape": [32, 32, 3],
+      "output_shape": [10],
+      "classes": [
+        { "key": "airplane", "label": "avión" },
+        { "key": "automobile", "label": "automóvil" },
+        { "key": "bird", "label": "ave" },
+        { "key": "cat", "label": "gato" },
+        { "key": "deer", "label": "ciervo" },
+        { "key": "dog", "label": "perro" },
+        { "key": "frog", "label": "rana" },
+        { "key": "horse", "label": "caballo" },
+        { "key": "ship", "label": "barco" },
+        { "key": "truck", "label": "camión" }
+      ],
+      "preprocessing": {
+        "color_order": "RGB",
+        "resize": [32, 32],
+        "interpolation": "INTER_AREA",
+        "scale": "1/255",
+        "dtype": "float32"
+      },
+      "framework": "keras",
+      "artifact_path": "weights/cifar10.keras",
+      "confidence_threshold": 50
+    }
+  ]
+}
