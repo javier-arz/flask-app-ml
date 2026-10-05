@@ -54,8 +54,8 @@ This is an **academic deployment project**, not a production system. The focus i
 
 ### 3.4 RESTful Inference API
 
-- `POST /api/predict` — accepts input, returns prediction with confidence
-- `GET /api/models` — lists available models with metadata
+- `POST /images/predict` — accepts an uploaded image, returns the prediction with confidence. This is the **single** prediction endpoint; duplicate prediction routes are not permitted.
+- `GET /api/models` — lists available models with metadata (model listing, not a prediction endpoint)
 - Responses are JSON: `{ "prediction": ..., "confidence": ..., "model": ... }`
 - Clear error handling: model not found, invalid input, preprocessing failure
 
@@ -131,4 +131,24 @@ Each registered model must document:
 
 ---
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-10-02
+## Amendment Log
+
+### 1.1.0 — 2026-10-05 — Single prediction endpoint (`POST /images/predict`)
+
+**Proposal**: In §3.4, replace the sanctioned prediction route `POST /api/predict` with `POST /images/predict`, and state that exactly one prediction endpoint is permitted. `GET /api/models` (model listing) is unchanged.
+
+**Rationale**: The feature `001-image-ml-inference` serves prediction through a single endpoint to avoid duplicated endpoints/controllers. The previously named route (`/api/predict`) conflicted with the implemented route (`/images/predict`), producing a documented constitution deviation. Sanctioning the implemented route removes the deviation without adding a duplicate endpoint.
+
+**Migration plan**:
+
+1. Update §3.4 to name `POST /images/predict` as the single prediction endpoint.
+2. In `.specify/specs/001-image-ml-inference/plan.md`, mark the §3.4 gate PASS and remove the corresponding Complexity Tracking entry.
+3. Update `research.md` (R13) and the feature checklist note to reflect the amendment.
+4. No code change is required: the implementation already serves `POST /images/predict`.
+5. Future inference features MUST expose a single prediction endpoint; model listing remains at `GET /api/models`.
+
+**Impact**: Non-breaking for the current implementation; aligns the governing document with the code.
+
+---
+
+**Version**: 1.1.0 | **Ratified**: 2026-10-02 | **Last Amended**: 2026-10-05

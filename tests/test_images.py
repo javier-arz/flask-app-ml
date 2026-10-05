@@ -1,8 +1,9 @@
 """Tests for the images blueprint."""
 
-import io
 import pytest
 from app import create_app
+from app.ml import inference_service
+from tests.helpers import image_upload
 
 
 @pytest.fixture
@@ -42,55 +43,57 @@ class TestImagesIndex:
         assert 'accept="image/*"' in html
         assert 'name="image"' in html
 
+    def test_index_contains_loading_indicator(self, client):
+        """GET /images/ should contain the progress indicator and spinner."""
+        response = client.get('/images/')
+        html = response.data.decode('utf-8')
+        assert 'id="loading"' in html
+        assert 'class="spinner"' in html
+        assert "fetch('/images/predict'" in html
 
-class TestImagesAnalyze:
-    """Tests for POST /images/analyze"""
 
-    def test_analyze_without_file_returns_400(self, client):
-        """POST /images/analyze without file should return HTTP 400."""
-        response = client.post('/images/analyze')
+class TestImagesPredict:
+    """Tests for POST /images/predict (real ML inference)."""
+
+    def test_predict_without_file_returns_400(self, client):
+        """POST /images/predict without file should return HTTP 400."""
+        response = client.post('/images/predict')
         assert response.status_code == 400
         data = response.get_json()
         assert 'error' in data
-        assert data['error'] == 'No image file provided'
+        assert data['error'] == inference_service.NO_IMAGE_MESSAGE
 
-    def test_analyze_with_file_returns_200(self, client):
-        """POST /images/analyze with file should return HTTP 200."""
-        data = {
-            'image': (io.BytesIO(b'test image content'), 'test.jpg')
-        }
+    def test_predict_with_file_returns_200(self, client, monkeypatch):
+        """POST /images/predict with a valid image should return HTTP 200."""
+        monkeypatch.setattr(inference_service.predictor, 'predict', lambda a: (3, 87.0))
         response = client.post(
-            '/images/analyze',
-            data=data,
+            '/images/predict',
+            data=image_upload(filename='test.jpg'),
             content_type='multipart/form-data'
         )
         assert response.status_code == 200
         result = response.get_json()
+        assert result['prediction'] == 'gato'
         assert 'message' in result
-        assert result['message'] == 'Imagen Recibida'
 
-    def test_analyze_with_png_file_returns_200(self, client):
-        """POST /images/analyze with PNG file should return HTTP 200."""
-        data = {
-            'image': (io.BytesIO(b'test png content'), 'test.png')
-        }
+    def test_predict_with_png_file_returns_200(self, client, monkeypatch):
+        """POST /images/predict with PNG file should return HTTP 200."""
+        monkeypatch.setattr(inference_service.predictor, 'predict', lambda a: (3, 87.0))
         response = client.post(
-            '/images/analyze',
-            data=data,
+            '/images/predict',
+            data=image_upload(filename='test.png'),
             content_type='multipart/form-data'
         )
         assert response.status_code == 200
         result = response.get_json()
-        assert result['message'] == 'Imagen Recibida'
+        assert result['prediction'] == 'gato'
 
-    def test_analyze_response_is_json(self, client):
-        """POST /images/analyze should return JSON content type."""
-        data = {
-            'image': (io.BytesIO(b'test image content'), 'test.jpg')
-        }
+    def test_predict_response_is_json(self, client, monkeypatch):
+        """POST /images/predict should return JSON content type."""
+        monkeypatch.setattr(inference_service.predictor, 'predict', lambda a: (0, 90.0))
         response = client.post(
-            '/images/analyze',
-            data=data,
+            '/images/predict',
+            data=image_upload(filename='test.jpg'),
             content_type='multipart/form-data'
         )
         assert response.content_type == 'application/json'

@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: Model Listing API
+  version: 1.0.0
+  description: >
+    Lists the available models with their metadata. This is a distinct
+    operation from prediction (which is served by POST /images/predict); it is
+    not a prediction endpoint.
+servers:
+  - url: /
+    description: Local Flask development server
+paths:
+  /api/models:
+    get:
+      summary: List available models with metadata
+      operationId: listModels
+      tags:
+        - api
+      responses:
+        "200":
+          description: A list of available models.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - models
+                properties:
+                  models:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModelMetadata"
+              example:
+                models:
+                  - name: cifar10
+                    type: classification
+                    input_modality: image
+                    input_shape: [32, 32, 3]
+                    output_shape: [10]
+                    classes:
+                      - { key: airplane, label: avión }
+                      - { key: automobile, label: automóvil }
+                    framework: keras
+        "500":
+          description: The model registry could not be read.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    ModelMetadata:
+      type: object
+      required:
+        - name
+        - type
+        - input_modality
+        - input_shape
+        - output_shape
+        - classes
+        - framework
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [regression, classification, clustering]
+        input_modality:
+          type: string
+          enum: [image, text]
+        input_shape:
+          type: array
+          items:
+            type: integer
+        output_shape:
+          type: array
+          items:
+            type: integer
+        classes:
+          type: array
+          items:
+            type: object
+            required: [key, label]
+            properties:
+              key:
+                type: string
+              label:
+                type: string
+        framework:
+          type: string
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: User-facing error message; never exposes internal details.
