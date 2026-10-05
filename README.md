@@ -7,7 +7,9 @@ classification inference** with a pre-trained CIFAR-10 Keras model.
 ## Features
 
 - Web page to upload an image and see the predicted category and confidence.
-- Canonical REST API: `POST /api/predict` and `GET /api/models`.
+- Loading spinner shown while the image is being analyzed.
+- Single prediction endpoint: `POST /images/predict`.
+- Model catalog endpoint: `GET /api/models`.
 - Confidence messaging: predictions below 50% confidence are flagged as uncertain.
 - Lazy, thread-safe model loading (the model is loaded once and reused).
 
@@ -32,6 +34,7 @@ classification inference** with a pre-trained CIFAR-10 Keras model.
 
    ```text
    SECRET_KEY=...
+   FLASK_APP=run.py
    FLASK_CONFIG=development
    APP_NAME=flask-app-ml
    KERAS_BACKEND=torch
@@ -44,17 +47,23 @@ classification inference** with a pre-trained CIFAR-10 Keras model.
 ## Run
 
 ```powershell
-python run.py
+flask run
 ```
 
 - Web UI: `http://127.0.0.1:5000/images`
-- API: `http://127.0.0.1:5000/api/predict` and `http://127.0.0.1:5000/api/models`
+- Model catalog: `http://127.0.0.1:5000/api/models`
+
+> **Note**: `python run.py` only creates the app and configures logging; it does
+> not start the server. Use `flask run` (with `FLASK_APP=run.py`).
 
 ## API
 
-### `POST /api/predict` (canonical)
+### `POST /images/predict`
 
-Multipart form field `image` (JPG/PNG/WEBP, max 5 MB).
+Multipart form field `image` (JPG/PNG/WEBP, max 5 MB). This is the single
+prediction endpoint (used by the web page).
+
+Confident result (confidence ≥ 50%):
 
 ```json
 {
@@ -66,13 +75,21 @@ Multipart form field `image` (JPG/PNG/WEBP, max 5 MB).
 }
 ```
 
+Uncertain result (confidence < 50%):
+
+```json
+{
+  "message": "Detecté: gato (32.4% de certeza). No estoy completamente seguro de esta predicción.",
+  "prediction": "gato",
+  "confidence": 32.4,
+  "uncertain": true,
+  "model": "cifar10"
+}
+```
+
 ### `GET /api/models`
 
 Returns the available models with metadata (internal artifact paths omitted).
-
-### `POST /images/analyze` (UI entry point)
-
-Same capability as `/api/predict`, used by the web page; returns the same JSON.
 
 Errors return `{"error": "..."}` with status `400` (missing/invalid image),
 `413` (too large), or `500` (inference failure), and never expose internal
@@ -88,11 +105,12 @@ pytest -q
 
 ```text
 app/
-├── ml/                # registry, preprocessing, predictor, inference service
+├── ml/                # model registry, preprocessing, predictor, inference service
 ├── models/            # ORM models + registry.json + weights/
-├── controllers/       # image_controller, api_controller
-├── routes/            # images blueprint, api blueprint
-└── templates/
-config/
+├── controllers/       # main_controller, image_controller, model_controller
+├── routes/            # mains, images, api blueprints
+├── templates/         # base.html, mains/index.html, images/index.html
+└── static/            # compiled Tailwind CSS
+config/                # environment configuration
 tests/                 # unit + integration tests
 ```
