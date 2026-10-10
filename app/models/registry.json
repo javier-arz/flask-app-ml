@@ -28,6 +28,26 @@
       "framework": "keras",
       "artifact_path": "weights/cifar10.keras",
       "confidence_threshold": 50
+    },
+    {
+      "name": "spam_classifier",
+      "type": "classification",
+      "input_modality": "text",
+      "input_shape": [1],
+      "output_shape": [2],
+      "classes": [
+        { "key": "ham", "label": "no spam" },
+        { "key": "spam", "label": "spam" }
+      ],
+      "preprocessing": {
+        "standardize": "lower_and_strip_punctuation",
+        "split": "whitespace",
+        "max_tokens": 5000,
+        "output_sequence_length": 100
+      },
+      "framework": "keras",
+      "artifact_path": "weights/mi_modelo_spam.keras",
+      "confidence_threshold": 50
     }
   ]
 }

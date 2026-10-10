@@ -7,8 +7,10 @@ classification inference** with a pre-trained CIFAR-10 Keras model.
 ## Features
 
 - Web page to upload an image and see the predicted category and confidence.
-- Loading spinner shown while the image is being analyzed.
-- Single prediction endpoint: `POST /images/predict`.
+- Web page to input text and detect if it is spam.
+- Loading spinner shown while the content is being analyzed.
+- Image prediction endpoint: `POST /images/predict`.
+- Spam detection endpoint: `POST /spam/predict`.
 - Model catalog endpoint: `GET /api/models`.
 - Confidence messaging: predictions below 50% confidence are flagged as uncertain.
 - Lazy, thread-safe model loading (the model is loaded once and reused).
@@ -16,9 +18,9 @@ classification inference** with a pre-trained CIFAR-10 Keras model.
 ## Requirements
 
 - Python 3.11+ (developed and tested on Python 3.14).
-- The ML backend: **Keras 3 with the PyTorch backend**. TensorFlow is not used
-  because it publishes no wheels for Python 3.14; Keras is the framework named in
-  the project constitution and the backend is a runtime detail.
+- The ML backend for image inference: **Keras 3 with the PyTorch backend**.
+- The ML backend for spam detection: **Keras 3 with TensorFlow** (required by the
+  `TextVectorization` layer in the spam model).
 
 ## Setup
 
@@ -50,7 +52,8 @@ classification inference** with a pre-trained CIFAR-10 Keras model.
 flask run
 ```
 
-- Web UI: `http://127.0.0.1:5000/images`
+- Image analysis UI: `http://127.0.0.1:5000/images`
+- Spam detection UI: `http://127.0.0.1:5000/spam`
 - Model catalog: `http://127.0.0.1:5000/api/models`
 
 > **Note**: `python run.py` only creates the app and configures logging; it does
@@ -87,11 +90,26 @@ Uncertain result (confidence < 50%):
 }
 ```
 
+### `POST /spam/predict`
+
+Form field `text` (plain text, max 10,000 characters). Returns the spam
+classification with confidence.
+
+```json
+{
+  "message": "Detecté: spam (95.3% de certeza).",
+  "prediction": "spam",
+  "confidence": 95.3,
+  "uncertain": false,
+  "model": "spam_classifier"
+}
+```
+
 ### `GET /api/models`
 
 Returns the available models with metadata (internal artifact paths omitted).
 
-Errors return `{"error": "..."}` with status `400` (missing/invalid image),
+Errors return `{"error": "..."}` with status `400` (missing/invalid input),
 `413` (too large), or `500` (inference failure), and never expose internal
 details.
 
@@ -107,9 +125,9 @@ pytest -q
 app/
 ├── ml/                # model registry, preprocessing, predictor, inference service
 ├── models/            # ORM models + registry.json + weights/
-├── controllers/       # main_controller, image_controller, model_controller
-├── routes/            # mains, images, api blueprints
-├── templates/         # base.html, mains/index.html, images/index.html
+├── controllers/       # main_controller, image_controller, model_controller, spam_controller
+├── routes/            # mains, images, spam, api blueprints
+├── templates/         # base.html, mains/index.html, images/index.html, spam/index.html
 └── static/            # compiled Tailwind CSS
 config/                # environment configuration
 tests/                 # unit + integration tests

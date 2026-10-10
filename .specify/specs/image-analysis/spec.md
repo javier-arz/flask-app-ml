@@ -5,6 +5,14 @@
 **Priority**: High
 **Created**: 2026-10-02
 **Implemented**: 2026-10-02
+**Superseded**: by `001-image-ml-inference` (2026-10-05)
+
+> [!IMPORTANT]
+> **SUPERSEDED — documento histórico, no usar como fuente de verdad.**
+> El endpoint `POST /images/analyze` descrito en este documento fue **eliminado**
+> al cerrar `001-image-ml-inference`. La predicción se sirve únicamente por
+> `POST /images/predict` (constitución §3.4, v1.1.0).
+> Referencia vigente: [`001-image-ml-inference`](../001-image-ml-inference/spec.md).
 
 ---
 
