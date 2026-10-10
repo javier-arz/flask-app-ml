@@ -3,6 +3,14 @@
 **Feature ID**: image-analysis
 **Status**: Completed
 **Created**: 2026-10-02
+**Superseded**: by `001-image-ml-inference` (2026-10-05)
+
+> [!IMPORTANT]
+> **SUPERSEDED — documento histórico, no usar como fuente de verdad.**
+> Las tareas T01, T02, T05 y T10 de este documento se refieren a
+> `POST /images/analyze`, endpoint **eliminado** al cerrar `001-image-ml-inference`.
+> El trabajo equivalente se replanteó en [`001-image-ml-inference`](../001-image-ml-inference/tasks.md)
+> contra `POST /images/predict`.
 
 ---
 

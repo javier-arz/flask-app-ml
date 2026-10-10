@@ -19,6 +19,7 @@ keras==3.13.2
 numpy==2.5.3
 opencv-python-headless==5.0.0.93
 torch==2.14.1
+tensorflow>=2.22.0
 
 # Testing
 pytest==9.1.1

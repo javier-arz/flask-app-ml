@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Spam detection ML inference with a pre-trained Keras model:
+  - Single prediction endpoint `POST /spam/predict` returning spam/ham classification
+  - Web interface at `/spam/` with text input form and AJAX submission
+  - Model artifact `app/models/weights/mi_modelo_spam.keras` (Spanish text, TextVectorization integrated)
+  - TensorFlow backend support for TextVectorization layer
+  - Error handling for empty/invalid text (400) and inference failures (500)
+  - Model registry entry `spam_classifier` in `app/models/registry.json`
+  - Navigation link to spam detection in base template
+  - Unit tests (`tests/unit/test_spam_predictor.py`) and integration tests (`tests/integration/test_spam_predict.py`)
+  - Model card at `app/models/weights/spam_classifier.md`
+  - README documentation for spam detection endpoint
+  - Spec Kit documentation for spam-detection feature
 - Image ML inference with a pre-trained CIFAR-10 model:
   - Single prediction endpoint `POST /images/predict` returning a real prediction
   - `GET /api/models` endpoint listing available models with metadata

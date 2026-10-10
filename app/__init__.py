@@ -40,6 +40,9 @@ def create_app(config_name) -> Flask:
     from app.routes.images import bp as images_blueprint
     app.register_blueprint(images_blueprint, url_prefix='/images')
 
+    from app.routes.spam import bp as spam_blueprint
+    app.register_blueprint(spam_blueprint, url_prefix='/spam')
+
     from app.routes.api import bp as api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api')
 
